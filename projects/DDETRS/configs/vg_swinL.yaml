@@ -1,0 +1,94 @@
+# Align with H-Deformable DETR (8 GPU training)
+# Language-guided detection
+# Add boxInst, iou branch, still tgt
+# main setting of our paper (R50 Obj365 pretrain)
+MODEL:
+  USE_IOU_BRANCH: True
+  LANG_GUIDE_DET: False #True #
+  LANG_AS_TGT: False #True #False
+  DECOUPLE_TGT: False #True
+  STILL_TGT_FOR_BOTH: True
+  META_ARCHITECTURE: "DDETRSVLUni"
+  BACKBONE:
+    NAME: "D2SwinTransformer"
+  SWIN:
+    PRETRAIN_IMG_SIZE: 384 
+    EMBED_DIM: 192 
+    DEPTHS: [2, 2, 18, 2] 
+    NUM_HEADS: [6, 12, 24, 48] 
+    WINDOW_SIZE: 12 
+    APE: False
+    DROP_PATH_RATE: 0.2 
+    PATCH_NORM: True
+  WEIGHTS: "weights/swin_large_patch4_window12_384_22k.pkl" 
+  PIXEL_MEAN: [123.675, 116.280, 103.530]
+  PIXEL_STD: [58.395, 57.120, 57.375]
+  MASK_ON: False 
+  OTA: False
+  STILL_CLS_FOR_ENCODER: True
+  USE_MULTI_BBOX_EMBED: False
+  TEXT:
+    TEXT_DECODER: 'google/flan-t5-base'
+    FIX_TEXT_DECODER: False
+    USE_GENERATE_LOSS: True
+    USE_FOCAL_LOSS: False
+    GENERATE_LOSS_WEIGHT: 1.0
+    USE_ALL_NEGATIVE: True
+    ZERO_SHOT_WEIGHT: 'datasets/lvis/lvis_v1_clip_a+cname_ViT-H.npy'
+    BEAM_SIZE: 3
+  DDETRS:
+    NUM_CLASSES: [1] 
+    NUM_OBJECT_QUERIES: 300
+    TWO_STAGE_NUM_PROPOSALS: 300
+    USE_DAB: False
+    USE_DINO: False
+    DYNAMIC_LABEL_ENC: True
+    DROPOUT: 0.0
+    TWO_STAGE: True
+    MIXED_SELECTION: False #True
+    LOOK_FORWARD_TWICE: False #True
+DATASETS:
+  TRAIN: ("vg_from_objects",) 
+  TEST: ("lvis_v1_minival",) 
+SOLVER:
+  IMS_PER_BATCH: 128 
+  BASE_LR: 0.0002
+  VL_LR: 0.0003
+  STEPS: (160000,) 
+  MAX_ITER: 180000 
+  WARMUP_FACTOR: 1.0
+  WARMUP_ITERS: 200
+  WEIGHT_DECAY: 0.05
+  OPTIMIZER: "ADAMW"
+  BACKBONE_MULTIPLIER: 0.1
+  CLIP_GRADIENTS:
+    ENABLED: True
+    CLIP_TYPE: "full_model"
+    CLIP_VALUE: 0.1
+    NORM_TYPE: 2.0
+  CHECKPOINT_PERIOD: 10000
+INPUT:
+  MIN_SIZE_TRAIN: (480, 512, 544, 576, 608, 640, 672, 704, 736, 768, 800)
+  CROP:
+    ENABLED: True
+    TYPE: "absolute_range"
+    SIZE: (384, 600)
+  FORMAT: "RGB"
+TEST:
+  EVAL_PERIOD: 10000
+  EVAL_AFTER_TRAIN: True
+  NUM_TEST_QUERIES: 300
+DATALOADER:
+  SAMPLER_TRAIN: "MultiDatasetSampler" #"ClassAwareSampler" # 
+  DATASET_RATIO: [1]
+  USE_DIFF_BS_SIZE: True
+  DATASET_BS: [2]
+  USE_RFS: [False]
+  USE_CAS: [False]
+  MULTI_DATASET_GROUPING: True
+  DATASET_INPUT_SIZE: [1024,]
+  DATASET_INPUT_SCALE: [[0.1, 2.0],]
+  NUM_WORKERS: 8
+  FILTER_EMPTY_ANNOTATIONS: True
+VERSION: 2
+OUTPUT_DIR: ./test

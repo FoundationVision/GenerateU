@@ -1,0 +1,17 @@
+-e . --user
+shapely==1.7.1
+git+https://github.com/XD7479/cocoapi.git#egg=pycocotools&subdirectory=PythonAPI
+git+https://github.com/lvis-dataset/lvis-api.git
+jpeg4py
+visdom
+easydict
+scikit-image
+omegaconf
+boto3
+ipdb
+git+https://github.com/openai/CLIP.git
+transformers==4.25
+einops
+timm==0.9.8
+opencv-python-headless
+git+https://github.com/salaniz/pycocoevalcap.git
