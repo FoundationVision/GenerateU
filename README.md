@@ -128,6 +128,7 @@
    conda activate GenerateU
 
    # install python dependencies
+   pip3 install -e . --user
    pip3 install -r requirements.txt 
 
    # compile Deformable DETR
